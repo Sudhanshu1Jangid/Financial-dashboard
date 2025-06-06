@@ -45,3 +45,74 @@ def parse_and_clean(df, date_col, desc_col, amt_col):
     df["month"] = df["date"].dt.to_period("M").dt.to_timestamp()
     return df
 
+@st.cache_data(show_spinner=False)
+def load_category_rules(json_file):
+    """Load category rules from uploaded JSON or use defaults."""
+    if json_file is None:
+        # Default keyword mapping
+        # Rest you can add by yourself...
+        return {
+            "Groceries": ["supermarket", "grocery", "market", "aldi", "lidl", "tesco"],
+            "Restaurants": ["cafe", "restaurant", "bar", "starbucks", "mcdonald", "domino"],
+            "Rent": ["rent", "landlord", "leasing"],
+            "Utilities": ["electricity", "water", "sewer", "gas bill", "internet", "telia", "vodafone"],
+            "Transportation": ["uber", "lyft", "bus", "train", "taxi", "fuel", "gas station"],
+            "Entertainment": ["netflix", "spotify", "cinema", "theatre", "concert"],
+            "Healthcare": ["pharmacy", "hospital", "clinic", "doctor"],
+            "Salary": ["salary", "payroll"],
+        }
+    try:
+        rules = json.load(json_file)
+        return rules
+    except Exception:
+        st.error("Invalid JSON for categories. Please upload a valid JSON file with format {\"Category\": [\"keyword1\", ...], ...}.")
+        st.stop()
+
+@st.cache_data(show_spinner=False)
+def apply_categories(df, rules):
+    """Categorize descriptions based on keyword rules."""
+    def map_cat(desc):
+        d = desc.lower()
+        for cat, keywords in rules.items():
+            for kw in keywords:
+                if kw.lower() in d:
+                    return cat
+        return "Other"
+    df["category"] = df["description"].apply(map_cat)
+    return df
+
+@st.cache_data(show_spinner=False)
+def compute_monthly(df):
+    """Aggregate total spending per month."""
+    monthly = df.groupby("month")["amount"].sum().reset_index().sort_values("month")
+    return monthly
+
+@st.cache_data(show_spinner=False)
+def forecast_spending(monthly):
+    """Linear regression forecast for next month."""
+    X = monthly["month"].map(lambda d: d.toordinal()).values.reshape(-1, 1)
+    y = monthly["amount"].values
+    if len(X) < 6:
+        return None
+    split = int(len(X) * 0.8)
+    X_train, X_test = X[:split], X[split:]
+    y_train, y_test = y[:split], y[split:]
+    model = LinearRegression()
+    model.fit(X_train, y_train)
+    y_pred_test = model.predict(X_test)
+    mae = mean_absolute_error(y_test, y_pred_test)
+    last_month = monthly["month"].max()
+    next_month_dt = (last_month + pd.DateOffset(months=1))
+    next_month_num = next_month_dt.toordinal()
+    next_pred = model.predict(np.array([[next_month_num]]))[0]
+    df_pred = pd.DataFrame({
+        "month": monthly["month"].iloc[split:],
+        "actual": y_test,
+        "predicted": y_pred_test
+    })
+    return {
+        "mae": mae,
+        "next_month": next_month_dt,
+        "next_pred": next_pred,
+        "df_pred": df_pred
+    }

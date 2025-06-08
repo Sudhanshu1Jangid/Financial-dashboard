@@ -51,14 +51,14 @@ def load_category_rules(json_file):
     if json_file is None:
         # Default keyword mapping
         return {
-            "Groceries": ["supermarket", "grocery", "market", "aldi", "lidl", "tesco"],
-            "Restaurants": ["cafe", "restaurant", "bar", "starbucks", "mcdonald", "domino"],
-            "Rent": ["rent", "landlord", "leasing"],
-            "Utilities": ["electricity", "water", "sewer", "gas bill", "internet", "telia", "vodafone"],
-            "Transportation": ["uber", "lyft", "bus", "train", "taxi", "fuel", "gas station"],
-            "Entertainment": ["netflix", "spotify", "cinema", "theatre", "concert"],
-            "Healthcare": ["pharmacy", "hospital", "clinic", "doctor"],
-            "Salary": ["salary", "payroll"],
+            "Groceries": ,
+            "Restaurants": ,
+            "Rent": ,
+            "Utilities": ,
+            "Transportation": ,
+            "Entertainment": ,
+            "Healthcare": ,
+            "Salary": ,
         }
     try:
         rules = json.load(json_file)

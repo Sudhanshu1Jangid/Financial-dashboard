@@ -171,7 +171,7 @@ else:
 
     # 4.1 Overview Tab
     with tabs[0]:
-        st.header("📑 Overview")
+        st.header(" Overview")
         col1, col2, col3 = st.columns(3)
         total_spent = df["amount"].sum()
         total_tx = len(df)
@@ -196,7 +196,7 @@ else:
 
     # 4.2 Categories Tab
     with tabs[1]:
-        st.header("🍽️ Spending by Category")
+        st.header(" Spending by Category")
         cat_df = df.groupby("category")["amount"].sum().reset_index().sort_values("amount", ascending=False)
         max_n = min(len(cat_df), 15)
         top_n = st.slider("Select Top N Categories", min_value=3, max_value=max_n, value=5)
@@ -238,7 +238,7 @@ else:
 
     # 4.3 Transactions Tab
     with tabs[2]:
-        st.header("🔍 Inspect Transactions")
+        st.header(" Inspect Transactions")
         with st.expander("Filter Options"):
             cats = st.multiselect("Filter by Category", options=sorted(df["category"].unique()), default=[])
             drange = st.date_input("Filter by Date Range", value=(df["date"].min(), df["date"].max()))
@@ -252,7 +252,7 @@ else:
 
     # 4.4 Forecast Tab
     with tabs[3]:
-        st.header("🔮 Forecast Next Month Spending")
+        st.header(" Forecast Next Month Spending")
         if not forecast:
             st.warning("At least 6 months of data required for forecast.")
         else:
@@ -278,12 +278,12 @@ else:
 
     # 4.5 Heatmap Tab
     with tabs[4]:
-        st.header("📅 Daily Spending Heatmap")
+        st.header(" Daily Spending Heatmap")
         plot_calendar_heatmap(df)
 
     # 4.6 Settings Tab
     with tabs[5]:
-        st.header("⚙️ Settings & Info")
+        st.header(" Settings & Info")
         st.markdown(
             """
 - **Category Rules JSON**: Upload a JSON file with structure:
